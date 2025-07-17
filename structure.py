@@ -29,7 +29,7 @@ files = [
 ]
 
 def create_structure():
-    print("🔧 Setting up your project structure...\n")
+    print(" Setting up your project structure...\n")
     for folder in folders:
         path = os.path.join(PROJECT_ROOT, folder)
         os.makedirs(path, exist_ok=True)

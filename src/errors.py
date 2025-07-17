@@ -9,3 +9,7 @@ class CodeGenerationError(Exception):
 class PromptFileError(Exception):
     """Raised when there's an issue with the prompt file."""
     pass
+
+class PromptFileError(Exception):
+    """Raised when the prompt file cannot be read."""
+    pass
