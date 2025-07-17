@@ -7,6 +7,7 @@ folders = [
     "generated_code",
     "mock_linux_headers/linux",
     "reports",
+    "src",
     "evaluation",
     "tests",
 ]
@@ -21,6 +22,10 @@ files = [
     "evaluation/metrics.py",
     "evaluation/static_analysis.py",
     "evaluation/rubric.py",
+    "src/prompt_runner.py",
+    "src/__init__.py",
+    "tests/test_prompt_runner.py",
+    "tests/__init__.py"
 ]
 
 def create_structure():
