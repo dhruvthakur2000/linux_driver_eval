@@ -1,43 +1,25 @@
-import argparse
 import os
-from src.models.mistral import MistralModel
-from src.errors import ModelLoadError, CodeGenerationError, PromptFileError
-from src.logger import get_logger
-from src.models.phi import PhiModel
-from src.models.mistral import MistralModel
-from src.models.codegemma import CodeGemmaModel
-from src.models.starcoder import StarCoderModel
-from src.models.deepseek import DeepSeekModel
+import argparse
+from dotenv import load_dotenv
+from src.models.model_registry import together_models, get_model
+from src.utils import extract_code_blocks, save_generated_code
+from src.logger import logger
+from src.errors import PromptFileError, ModelLoadError ,CodeGenerationError
 
-logger=get_logger("code_runner")
-
-MODEL_REGISTRY = {
-    "phi": PhiModel,
-    "mistral": MistralModel,
-    "codegemma": CodeGemmaModel,
-    "starcoder": StarCoderModel,
-    "deepseek": DeepSeekModel
-}
+load_dotenv()
+TOGETHER_API_KEY=os.getenv("TOGETHER_API_KEY")
 
 
 def read_prompt(path):
     try:
         with open(path, "r") as f:
-            return f.read()
+            prompt=f.read()
+            logger.info(f"Loaded prompt form {path}")
+            return prompt
     except Exception as e:
         logger.error(f"Failed to read prompt:{e}")
         raise PromptFileError(str(e))
     
-
-def save_generated_code(output_path,code):
-    try:
-        os.makedirs(os.path.dirname(output_path),exist_ok=True)
-        with open(output_path,"w") as f:
-            f.write(code)
-            logger.info(f"saved the generated code at:{output_path}")
-    except Exception as e:
-        logger.error("could not save the generated code")
-        raise CodeGenerationError
 
 def main():
     parser= argparse.ArgumentParser(description="Run prompt with the selected model")
@@ -49,7 +31,7 @@ def main():
     
     parser.add_argument("--model", "--m",
                         type=str,
-                        choices=list(MODEL_REGISTRY.keys()),
+                        choices=list(together_models.keys()),
                         help="Choose the model to use"
                         )
 
@@ -59,34 +41,31 @@ def main():
 
     args=parser.parse_args()
     
-    logger.info(f"model selected:{args.model}")
-    logger.info(f"The prompt selected from :{args.prompt}")
+
       
-
-    prompt=read_prompt(args.prompt)
-    
     try:
-        model_class = MODEL_REGISTRY.get(args.model)
-        model_instance = model_class()
-    except Exception as e:
-        logger.error(f"Failed to initialize model: {e}")
-        raise ModelLoadError(str(e))
+        prompt_path=os.path.join("prompts",args.prompt)
+        prompt=read_prompt(prompt_path)
+        logger.info(f"model selected:{args.model}")
+        logger.info(f"The prompt selected from :{args.prompt}")
 
-    try:
-        logger.info("⚙ Generating code...")
-        code = model_instance.generate_code(prompt)
-    except Exception as e:
-        logger.error(f"Code generation failed: {e}")
-        raise CodeGenerationError(str(e))
-    
-    # setting up the output path
-    prompt_name = os.path.splitext(os.path.basename(args.prompt))[0]
-    default_output = os.path.join("generated_code", f"{args.model}_{prompt_name}.c")
-    output_path = args.output if args.output else default_output
+        model= get_model(args.model,TOGETHER_API_KEY)
+        response=None
+        try:
+                response = model.generate_code(prompt)
+                logger.info(" Response received from Together AI.")
+                logger.debug(f"Raw Response:\n{response}")
+                
 
-    save_generated_code(output_path, code)
-    logger.info("Code generation pipeline completed.")
+        except Exception as model_error:
+            raise ModelLoadError(f"Together AI generation failed: {model_error}")
 
+        code = extract_code_blocks(response)
+        save_generated_code(args.model, code)
+        logger.info("Code generation complete.")
 
+    except (PromptFileError, ModelLoadError, Exception) as e:
+        logger.error(f" Pipeline failed: {e}")
+        
 if __name__=="__main__":
-    main()
+     main()
