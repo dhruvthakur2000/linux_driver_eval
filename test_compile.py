@@ -1,15 +1,16 @@
-from src.compiler import compile_code
+# test_static_eval.py
 
-if __name__ == "__main__":
-    model_name = "mistral"
-    file_name = "char_driver.c"
-    source_path = f"generated_code/{file_name}"
+from src.compiler import evaluate_c_code
 
-    success, output = compile_code(source_path, model_name)
-    
-    if success:
-        print(" Compilation Succeeded.")
-    else:
-        print(" Compilation Failed.")
-    
-    print(" Compiler Output:\n", output)
+# Paths
+code_path = "generated_code/char_driver.c"
+report_path = "reports/lint_logs"
+
+print(" Running Static Analysis for LLM-generated Linux Driver Code...")
+issues = evaluate_c_code(code_path, report_path)
+
+print("\n Issue Summary:")
+for category, entries in issues.items():
+    print(f"  {category}: {len(entries)} issue(s)")
+    for item in entries:
+        print(f"    - {item}")

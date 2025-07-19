@@ -1,2 +1,8 @@
-#pragma once
-#define THIS_MODULE 0
+#ifndef _LINUX_MODULE_H
+#define _LINUX_MODULE_H
+
+#define MODULE_LICENSE(x)
+#define MODULE_AUTHOR(x)
+#define MODULE_DESCRIPTION(x)
+
+#endif

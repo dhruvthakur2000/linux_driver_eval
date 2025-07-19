@@ -1,34 +1,26 @@
-import subprocess
+# src/compiler.py
+
 import os
 from src.logger import logger
+from src.static_linter import lint_c_code
 
-def compile_code(source_path: str, model_name: str) -> tuple:
+def evaluate_c_code(file_path: str, report_path: str) -> dict:
     """
-    Compiles the C file and saves output to logs.
-    Returns (True/False, output_text)
+    Runs custom static checks on the given C source file.
+    Generates a report and returns the issues found.
     """
-    file_name = os.path.basename(source_path).replace(".c", "")
-    log_dir = os.path.join("reports", "compilation_logs")
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, f"{file_name}.log")
-
-    output_path = source_path.replace(".c", ".o")
-    compile_cmd = ["gcc", "-Wall", "-Werror", "-c", source_path, "-o", output_path]
-
     try:
-        result = subprocess.run(compile_cmd, capture_output=True, text=True)
-        output = result.stdout + result.stderr
+        logger.info(f" Starting static analysis on {file_path}")
+        issues = lint_c_code(file_path, report_path)
 
-        with open(log_file, "w") as f:
-            f.write(output)
-
-        if result.returncode == 0:
-            logger.info(f" Compilation successful for {source_path}")
-            return True, output
+        total_issues = sum(len(v) for v in issues.values())
+        if total_issues == 0:
+            logger.info(" No issues found in static analysis.")
         else:
-            logger.warning(f" Compilation failed for {source_path}")
-            return False, output
+            logger.warning(f" {total_issues} issues found during static analysis.")
+
+        return issues
 
     except Exception as e:
-        logger.error(f" Compiler crashed: {e}")
-        return False, str(e)
+        logger.error(f" Evaluation failed: {e}")
+        return {}
