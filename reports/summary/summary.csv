@@ -1,0 +1,2 @@
+model,prompt,function_score,missing_functions,missing_includes,suspicious_macros,present_optional_components
+driver,char.txt,9,release,,EIO|EFAULT|copy_to_user,file_operations|init
