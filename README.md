@@ -69,4 +69,4 @@ reports/metrics/char_driver_mistral.json
 
 ## 👤 Author
 
-Dhruv Thakur — [GitHub](https://github.com/dhruvthakurdev)
+Dhruv Thakur — [GitHub](https://github.com/dhruvthakur2000)
