@@ -1,5 +1,7 @@
 import os
+import json
 import re
+from typing import Dict, Any
 from datetime import datetime
 from src.logger import logger
 
@@ -19,3 +21,26 @@ def save_generated_code(model_name: str, code: str,output_path: str = "generated
     with open(file_path, "w") as f:
         f.write(code)
     logger.info(f" Code saved to {file_path}")
+
+
+
+def ensure_dir(path: str) -> None:
+    if path:
+        os.makedirs(path, exist_ok=True)
+
+
+
+def save_json_report(data: Dict[str, Any], path: str) -> None:
+    try:
+        ensure_dir(os.path.dirname(path))
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        logger.info(f" JSON report saved: {path}")
+    except Exception as e:
+        logger.error(f"Failed to save JSON report to {path}: {e}")
+
+        
+
+def read_text(path: str) -> str:
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        return f.read()

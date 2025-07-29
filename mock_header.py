@@ -1,5 +1,6 @@
 import os
 
+
 MOCK_DIR = "mock_linux_headers/linux"
 os.makedirs(MOCK_DIR, exist_ok=True)
 

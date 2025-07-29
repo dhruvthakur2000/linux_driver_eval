@@ -1,0 +1,84 @@
+{
+    "file": "generated_code/char_driver.c",
+    "timestamp": "2025-07-30T01:05:12.205386",
+    "compilation": {
+        "success": false,
+        "warnings_count": 15,
+        "errors_count": 21,
+        "log_file": "logs\\char_driver_compile_20250730_010512.log"
+    },
+    "static_analysis": {
+        "missing_functions": [
+            "open",
+            "read",
+            "write",
+            "release"
+        ],
+        "missing_types": [],
+        "suspicious_macros": [
+            "EIO",
+            "EFAULT",
+            "copy_to_user"
+        ],
+        "missing_includes": [],
+        "issues_count": 7
+    },
+    "functionality": {
+        "metrics": {
+            "basic_operations": 0.0,
+            "error_handling": 0.7,
+            "edge_cases": 0.5,
+            "kernel_integration": 0.0
+        },
+        "findings": {
+            "missing_functions": [
+                "open",
+                "read",
+                "write",
+                "release"
+            ],
+            "has_file_operations_struct": true
+        }
+    },
+    "security": {
+        "metrics": {
+            "buffer_safety": 1.0,
+            "race_conditions": 0.6,
+            "input_validation": 0.8,
+            "resource_management": 0.7999999999999999
+        },
+        "findings": {
+            "unsafe_calls": [],
+            "user_copy_calls": 2,
+            "uses_mutex": false
+        }
+    },
+    "code_quality": {
+        "metrics": {
+            "style_compliance": 1.0,
+            "documentation": 1.0,
+            "maintainability": 0.7000000000000001
+        },
+        "findings": {
+            "long_line_warnings": 0,
+            "mixed_tabs_spaces": false
+        }
+    },
+    "advanced_features": {
+        "metrics": {
+            "device_tree": 0.0,
+            "power_management": 0.0,
+            "debug_support": 0.0
+        },
+        "findings": {}
+    },
+    "overall_score": {
+        "scores": {
+            "correctness": 0.0,
+            "security": 0.0,
+            "code_quality": 0.0,
+            "advanced": 0.0,
+            "overall_score": 0.0
+        }
+    }
+}

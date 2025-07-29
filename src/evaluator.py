@@ -1,71 +1,79 @@
 import os
-import re
+import argparse
 import json
+from datetime import datetime
+
 from src.logger import logger
+from src.compiler import compile_code
+from src.evaluation.static_linter import lint_c_code
+from src.evaluation.functionality_checker import check_driver_apis
+from src.evaluation.security_check import scan_security_issues
+from src.evaluation.quality_check import check_code_quality
+from src.evaluation.adv_feature import check_advanced_features
+from src.metrics import score_all
 
-REQUIRED_FUNCTIONS = ['open', 'read', 'write', 'release']
-REQUIRED_INCLUDES = ['<linux/fs.h>', '<linux/init.h>', '<linux/module.h>']
-SUSPICIOUS_MACROS = ['EIO', 'EFAULT', 'copy_to_user']
-OPTIONAL_COMPONENTS = ['file_operations', 'init', 'exit', 'register_chrdev']
 
-def evaluate_code(file_path: str, model_name: str, prompt_used: str, output_path="reports/metrics"):
-    try:
-        with open(file_path, "r") as f:
-            code = f.read()
-    except Exception as e:
-        logger.error(f" Failed to read code: {e}")
-        return
+def evaluate_file(file_path: str, output_dir: str) -> None:
+    logger.info(f" Evaluating: {file_path}")
 
-    result = {
-        "model": model_name,
-        "prompt": prompt_used,
-        "missing_functions": [],
-        "missing_includes": [],
-        "suspicious_macros": [],
-        "present_optional_components": [],
-        "function_score": 0,
-        "final_score":0
+    evaluation_data = {
+        "file": file_path,
+        "timestamp": datetime.now().isoformat(),
     }
 
-    # Check for required functions
-    for func in REQUIRED_FUNCTIONS:
-        pattern = rf"{func}\s*\("
-        if not re.search(pattern, code):
-            result["missing_functions"].append(func)
-    function_score=10-len(result["missing_functions"])
-    function_score=max(0, function_score)
+    try:
+        # 1. Compilation
+        compilation_result = compile_code(file_path)
+        evaluation_data["compilation"] = compilation_result
 
-    # Check for required includes
-    missing_include_count=0
-    for inc in REQUIRED_INCLUDES:
-        if inc not in code:
-            result["missing_includes"].append(inc)
-            missing_include_count +=1
+        # 2. Static Lint
+        lint_result = lint_c_code(file_path)
+        evaluation_data["static_analysis"] = lint_result
 
-    # Check for suspicious macros
-    macro_penalty=0
-    for macro in SUSPICIOUS_MACROS:
-        if macro in code:
-            result["suspicious_macros"].append(macro)
-            macro_penalty +=1
+        # 3. Functionality
+        func_result = check_driver_apis(file_path)
+        evaluation_data["functionality"] = func_result
 
-    # Check for optional structure
-    bonus=0
-    for component in OPTIONAL_COMPONENTS:
-        if component in code:
-            result["present_optional_components"].append(component)
-            bonus +=0.5
+        # 4. Security
+        security_result = scan_security_issues(file_path)
+        evaluation_data["security"] = security_result
 
-    # Score: 10 - 1 for each missing function, max 10
-    result["function_score"]=function_score
-    result["final_score"] = round(function_score - missing_include_count - macro_penalty + bonus, 2)
-    result["function_score"] = max(0, result["function_score"])  # No negative scores
+        # 5. Code Quality
+        quality_result = check_code_quality(file_path)
+        evaluation_data["code_quality"] = quality_result
 
-    # Save report
-    os.makedirs(output_path, exist_ok=True)
-    report_file = os.path.join(output_path, f"{os.path.basename(file_path).replace('.c', '')}_{model_name}.json")
-    with open(report_file, "w") as f:
-        json.dump(result, f, indent=4)
+        # 6. Advanced Features
+        advanced_result = check_advanced_features(file_path)
+        evaluation_data["advanced_features"] = advanced_result
 
-    logger.info(f"Evaluation report saved to {report_file}")
-    return result
+        # 7. Scoring (calculate total score)
+        scores = score_all(evaluation_data)
+        evaluation_data["overall_score"] = scores
+
+        # 8. Save JSON report
+        os.makedirs(output_dir, exist_ok=True)
+        filename = os.path.splitext(os.path.basename(file_path))[0]
+        report_path = os.path.join(output_dir, f"{filename}_evaluation.json")
+        with open(report_path, "w") as f:
+            json.dump(evaluation_data, f, indent=4)
+
+        logger.info(f"Evaluation report saved to {report_path}")
+
+
+    except Exception as e:
+        logger.error(f"Evaluation failed: {e}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Evaluate Linux driver C code")
+    parser.add_argument("--file", "-f", required=True, help="Path to the C file")
+    parser.add_argument("--output", "-o", default="reports", help="Reports output dir")
+    args = parser.parse_args()
+
+    evaluate_file(args.file, args.output)
+    logger.info(f" Evaluation complete. Report saved to {args.output}")
+
+
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,2 @@
-Model,Prompt,Function Score,Final Score
-driver,char.txt,9,0.0
-mistral,char_driver.txt,9,0.0
+file,model,overall_score,compilation_success,compilation_errors,compilation_warnings
+generated_code/char_driver.c,,0,False,21,15

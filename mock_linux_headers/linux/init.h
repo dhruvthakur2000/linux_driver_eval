@@ -1,7 +1,4 @@
-#ifndef _LINUX_INIT_H
-#define _LINUX_INIT_H
-
-#define __init
-#define __exit
-
-#endif
+/* mock_linux_headers/linux/init.h */
+#pragma once
+#define module_init(x)
+#define module_exit(x)
