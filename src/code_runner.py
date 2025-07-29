@@ -40,32 +40,34 @@ def main():
                         help="Option output path for code to be saved") 
 
     args=parser.parse_args()
+    if not args.output:
+        args.output = "generated_code"
     
 
-      
     try:
-        prompt_path=os.path.join("prompts",args.prompt)
-        prompt=read_prompt(prompt_path)
-        logger.info(f"model selected:{args.model}")
-        logger.info(f"The prompt selected from :{args.prompt}")
+            prompt_path = os.path.join("prompts", args.prompt)
+            prompt = read_prompt(prompt_path)
 
-        model= get_model(args.model,TOGETHER_API_KEY)
-        response=None
-        try:
+            logger.info(f"model selected: {args.model}")
+            logger.info(f"The prompt selected from :{args.prompt}")
+
+            model = get_model(args.model)
+
+            try:
                 response = model.generate_code(prompt)
                 logger.info(" Response received from Together AI.")
                 logger.debug(f"Raw Response:\n{response}")
-                
 
-        except Exception as model_error:
-            raise ModelLoadError(f"Together AI generation failed: {model_error}")
+            except Exception as model_error:
+                raise ModelLoadError(f"Together AI generation failed: {model_error}")
 
-        code = extract_code_blocks(response)
-        save_generated_code(args.model, code)
-        logger.info("Code generation complete.")
+            code = extract_code_blocks(response)
+            save_generated_code(args.model, code, output_path=args.output)
+            logger.info("Code generation complete.")
 
     except (PromptFileError, ModelLoadError, Exception) as e:
         logger.error(f" Pipeline failed: {e}")
-        
-if __name__=="__main__":
-     main()
+
+
+if __name__ == "__main__":
+    main()

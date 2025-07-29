@@ -1,1 +1,1 @@
-Write a Linux character device driver in C that supports basic read/write operations with a 1KB buffer.
+Write a code for Linux character device driver in C that supports basic read/write operations with a 1KB buffer.

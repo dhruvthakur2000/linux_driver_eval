@@ -1,19 +1,19 @@
-from src.models.together import TogetherModel
-from src.errors import ModelLoadError 
-from src.logger import logger
+from src.models.together import TogetherModel  
 
-together_models={
-    "mistral": "mistralai/Mistral-7B-Instruct-v0.1",
-    "phi": "microsoft/phi-2",
-    "codegemma": "google/codegemma-7b-it",
-    "starcoder": "bigcode/starcoder2-7b",
-    "deepseek": "deepseek-ai/deepseek-coder-6.7b-instruct"
+
+together_models = {
+    "qwen3_32b": "Qwen/Qwen1.5-32B-Chat",
+    "deepseek_r1": "deepseek-ai/DeepSeek-R1-0528",
+    "afm_preview": "arcee/AFM-4.5B-Preview",
+    "llama_vision": "meta-llama/Meta-Llama-Vision",
+    "deepseek_distill": "deepseek-ai/DeepSeek-Coder-33B-Instruct",
+    "exaone_deep": "lg-ai/EXAONE-32B",
+    "exaone_3_5": "lg-ai/EXAONE-3.5-32B-Instruct",
+    "llama3_turbo": "meta-llama/Meta-Llama-3-70B-Instruct"
 }
 
-def get_model(model_key:str,api_key:str):
-    if model_key not in together_models:
-        logger.error(f" Unsupported model: {model_key}")
-        raise ModelLoadError(f"Model '{model_key}' not supported ")
-    logger.info(f" Model selected: {model_key}")
-    return TogetherModel(together_models[model_key],api_key)
-        
+def get_model(key: str):
+    model_name = together_models.get(key)
+    if model_name is None:
+        raise ValueError(f"Model key '{key}' not found.")
+    return TogetherModel(model_name)

@@ -42,7 +42,7 @@ def lint_c_code(file_path: str, report_path: str) -> dict:
         os.makedirs(report_path, exist_ok=True)
         report_file = os.path.join(report_path, f"{os.path.basename(file_path)}_lint.txt")
         with open(report_file, "w") as f:
-            f.write(f"🔍 Static Lint Report for {file_path}\n\n")
+            f.write(f" Static Lint Report for {file_path}\n\n")
             for k, v in issues.items():
                 f.write(f"{k.replace('_', ' ').title()}:\n")
                 if v:

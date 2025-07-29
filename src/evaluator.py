@@ -23,7 +23,8 @@ def evaluate_code(file_path: str, model_name: str, prompt_used: str, output_path
         "missing_includes": [],
         "suspicious_macros": [],
         "present_optional_components": [],
-        "function_score": 0
+        "function_score": 0,
+        "final_score":0
     }
 
     # Check for required functions
@@ -31,24 +32,33 @@ def evaluate_code(file_path: str, model_name: str, prompt_used: str, output_path
         pattern = rf"{func}\s*\("
         if not re.search(pattern, code):
             result["missing_functions"].append(func)
+    function_score=10-len(result["missing_functions"])
+    function_score=max(0, function_score)
 
     # Check for required includes
+    missing_include_count=0
     for inc in REQUIRED_INCLUDES:
         if inc not in code:
             result["missing_includes"].append(inc)
+            missing_include_count +=1
 
     # Check for suspicious macros
+    macro_penalty=0
     for macro in SUSPICIOUS_MACROS:
         if macro in code:
             result["suspicious_macros"].append(macro)
+            macro_penalty +=1
 
     # Check for optional structure
+    bonus=0
     for component in OPTIONAL_COMPONENTS:
         if component in code:
             result["present_optional_components"].append(component)
+            bonus +=0.5
 
     # Score: 10 - 1 for each missing function, max 10
-    result["function_score"] = 10 - len(result["missing_functions"])
+    result["function_score"]=function_score
+    result["final_score"] = round(function_score - missing_include_count - macro_penalty + bonus, 2)
     result["function_score"] = max(0, result["function_score"])  # No negative scores
 
     # Save report
